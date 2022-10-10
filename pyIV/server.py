@@ -12,7 +12,7 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
 
     def handle(self):
         # self.request - TCP socket connected to the client
-        self.data = self.request.recv(5000).strip()
+        self.data = self.request.recv(1024).strip().decode()
 
         print("{} sent:".format(self.client_address[0]))
         print(self.data)
