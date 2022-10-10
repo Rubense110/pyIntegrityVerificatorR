@@ -20,13 +20,11 @@ def log(message, display=False):
     """
     Devuelve por consola y escribe el log en el log file.
     """
-    
     if display:
         print(message)
-    try:
-        log_file.write(message+"\n")
-    except Exception as e:
-        print(e)
+    with open(conf.LOGS, 'a') as f:
+        f.write("\n"+message)
+        f.close()
 
 class Handler_TCPServer(socketserver.BaseRequestHandler):
     """
@@ -40,41 +38,32 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
     def handle(self):
 
         local_time = time.strftime("[%d/%m/%y %H:%M:%S]", time.localtime())
-        # self.request - TCP socket connected to the client
+
+        #Cargamos el ultimo mensaje recibido al servidor
         self.data = self.request.recv(1024).strip().decode()
+        #Comprobamos integridad del mensaje recibido
         cond = proof(self.data)
         print("{} sent:".format(self.client_address[0]))
         
         if cond[0]:
 
-            message = local_time +  "[ip:  "+self.client_address[0]+"]"+ " [notice] " + cond[3]
-            log(message,False)
+            message = local_time +" ["+self.client_address[0]+"]"+ " [notice] " + cond[3]
+            log(message,True)
             print("Integridad correcta")
             print(self.data)
         else:
 
-            globals()['error'] = globals()['error'] + 1
             message = local_time + "[ip:  "+self.client_address[0]+"]"+ " [error] " + cond[3]
             log(message,True)
             print("Fallo integridad: %s != %s " %(cond[1], cond[2]))
-        # just send back ACK for data arrival confirmation
+        # Devolvemos el ACK al cliente, confirmando el la llegada del mensaje
         self.request.sendall("ACK from TCP Server".encode())
     
 
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 9999
-    local_time = time.strftime("[%d/%m/%y %H:%M:%S]", time.localtime())
-    log_file = None
-    error = 0
-
-    try:
-        log_file = open(conf.LOGS, "a")
-    except Exception as e:
-        print("Algo no esta funcionando como debería al abrir el log: " + str(e))
-        exit(0)
-
-
+     
     # Init the TCP server object, bind it to the localhost on 9999 port
     tcp_server = socketserver.TCPServer((HOST, PORT), Handler_TCPServer)
 
@@ -83,10 +72,8 @@ if __name__ == "__main__":
     try:
         print("Servidor activo (HOST: %s ,PORT: %d)" %(HOST, PORT)) 
         tcp_server.serve_forever()
-    except Exception as e:
-        print("Error de apertura: ",e)
 
-    if log_file is not None:
-        log_file.close()
+    except Exception as e:
+        print("Error de apertura servidor: ",e)
 
     
