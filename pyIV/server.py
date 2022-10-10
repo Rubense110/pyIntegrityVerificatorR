@@ -18,7 +18,6 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
         print(self.data)
         # just send back ACK for data arrival confirmation
         self.request.sendall("ACK from TCP Server".encode())
-    
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 9999
