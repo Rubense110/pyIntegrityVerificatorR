@@ -1,66 +1,51 @@
+from logging import exception
 import socket
 import hmac
 import hashlib
-import random
+import time
 import secrets
+from ssl import ALERT_DESCRIPTION_UNKNOWN_CA
 
-host_ip, server_port = "127.0.0.1", 9999
 
-#Cuerpo mensaje al servidor
-msg = "16272727 17172772 20000"
 key= "123456"
 nonce = secrets.token_urlsafe()
-msg_hmac = hmac.new(key.encode(), (msg+nonce).encode(), hashlib.sha256).hexdigest()
-data = msg +" | "+ nonce +" | "+ msg_hmac
+host_ip, server_port = "127.0.0.1", 9999
+msg = "16272727 17172772 20000"
 
-x = random.random()
+class Ataque():
 
-if x<=2/3:
-    y = random.random()
-    # Initialize a TCP client socket using SOCK_STREAM
-    tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    clave = key
+    nonces = nonce
 
-    try:
-        if y<0.5:
-            print("MitM")
-            #Establecemos conexion con el servidor TCP para simular ataque de integridad (MitM)
-            new_msg = "16272728 17172772 2000000"
-            data = new_msg +" | "+ data.split("|")[1].strip() +" | "+ data.split("|")[2].strip()
-            tcp_client.connect((host_ip, server_port))
-            tcp_client.sendall(data.encode())
-        else:
-            print("normal")
-            # Establish connection to TCP server and exchange data
-            tcp_client.connect((host_ip, server_port))
-            tcp_client.sendall(data.encode())
+    def __init__(self, host, port,msg,newmsg= None,replays= 1):
+        self.host = host
+        self.port = port
+        self.msg_hmac = hmac.new(key.encode(), (msg+nonce).encode(), hashlib.sha256).hexdigest()
 
-        # Read data from the TCP server and close the connection
-        received = tcp_client.recv(1024)
-    finally:
-        tcp_client.close()
+        if(newmsg!= None): self.data = "|".join([newmsg,self.nonces,self.msg_hmac])
+        else :             self.data = "|".join([msg,self.nonces,self.msg_hmac])
 
-    print ("Bytes Sent:     {}".format(data))
-    print ("Bytes Received: {}".format(received.decode()))
-
-
-else:
-    i = 0
-    while(i<2):
-        # Initialize a TCP client socket using SOCK_STREAM
-        tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        try:
-            print("reply")
-            # Establish connection to TCP server and exchange data
-            tcp_client.connect((host_ip, server_port))
-            tcp_client.sendall(data.encode())
-            # Read data from the TCP server and close the connection
+        i=0
+        while(i<replays):
+            tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                tcp_client.connect((host_ip, server_port,))
+            except:
+                print("Servidor inalcanzable")
+                exit(0)
+            tcp_client.sendall(self.data.encode())
             received = tcp_client.recv(1024)
-        finally:
             tcp_client.close()
+            print ("Bytes Enviados:     {}".format(self.data)+ "\nBytes Recividos: {}".format(received.decode()))
+            i+=1
+        
 
-        print ("Bytes Sent:     {}".format(data))
-        print ("Bytes Received: {}".format(received.decode()))
-        i=i+1
+
+msg2= "16272728 17172772 2000000"
 
 
+Ataque(host_ip,server_port,msg)             # mensaje normal, realmente no es ningun ataque
+
+Ataque(host_ip,server_port,msg,msg2)       # mensaje alterado por msg2, ataque MitM
+
+Ataque(host_ip,server_port,msg,replays=4)  # mensaje repetido x veces, ataque replay
