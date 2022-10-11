@@ -34,25 +34,19 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
         cond = self.proof()
         print("{} sent:".format(self.client_address[0]))
         print(self.nonces)
+        message = local_time +" ["+self.client_address[0]+"]"+ " [notice] " + cond[3]
+
         if cond[0]==0:
-
-            message = local_time +" ["+self.client_address[0]+"]"+ " [notice] " + cond[3]
             self.log(message,True)
-            print("Integridad correcta\n")
-            print(self.data)
+            print("Integridad correcta\n",self.data,"\n")
         elif cond[0]==1:
-
-            message = local_time +" ["+self.client_address[0]+"]"+ " [error_rp] " + cond[3]
             self.log(message,True)
-            print("Fallo replay\n")
-            print(self.data)
+            print("Fallo replay\n",self.data,"\n")
         else:
-
-            message = local_time + " ["+self.client_address[0]+"]"+ " [error_int] " + cond[3]
             self.log(message,True)
-            print("Fallo integridad: %s != %s \n" %(cond[1], cond[2]))
-        # Devolvemos el ACK al cliente, confirmando el la llegada del mensaje
-        self.request.sendall("ACK from TCP Server".encode())
+            print("Fallo integridad: %s != %s " %(cond[1], cond[2]),self.request.sendall("ACK from TCP Server".encode()),"\n")
+            # Devolvemos el ACK al cliente, confirmando el la llegada del mensaje
+        
     
     def loadNonces(self) -> list:
         self.nonces = []
@@ -92,7 +86,7 @@ if __name__ == "__main__":
     # Activamos el servidor TCP.
     # Para abortar el servidor presionar Ctrl-C
     try:
-        print("Servidor activo (HOST: %s ,PORT: %d)" %(HOST, PORT)) 
+        print("Servidor activo (HOST: %s ,PORT: %d)\n" %(HOST, PORT)) 
         tcp_server.serve_forever()
 
     except Exception as e:
