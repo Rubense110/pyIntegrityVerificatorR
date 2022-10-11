@@ -50,7 +50,7 @@ else:
         tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:
-            print("reply")
+            print("replay")
             # Establish connection to TCP server and exchange data
             tcp_client.connect((host_ip, server_port))
             tcp_client.sendall(data.encode())

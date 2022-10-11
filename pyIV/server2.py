@@ -38,19 +38,19 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
 
             message = local_time +" ["+self.client_address[0]+"]"+ " [notice] " + cond[3]
             self.log(message,True)
-            print("Integridad correcta\n")
+            print("Integridad correcta")
             print(self.data)
         elif cond[0]==1:
 
             message = local_time +" ["+self.client_address[0]+"]"+ " [error_rp] " + cond[3]
             self.log(message,True)
-            print("Fallo replay\n")
+            print("Fallo reply")
             print(self.data)
         else:
 
             message = local_time + " ["+self.client_address[0]+"]"+ " [error_int] " + cond[3]
             self.log(message,True)
-            print("Fallo integridad: %s != %s \n" %(cond[1], cond[2]))
+            print("Fallo integridad: %s != %s " %(cond[1], cond[2]))
         # Devolvemos el ACK al cliente, confirmando el la llegada del mensaje
         self.request.sendall("ACK from TCP Server".encode())
     
