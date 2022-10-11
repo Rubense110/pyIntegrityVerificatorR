@@ -35,19 +35,13 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
         print("{} sent:".format(self.client_address[0]))
         print(self.nonces)
         message = local_time +" ["+self.client_address[0]+"]"+ " [notice] " + cond[3]
+        self.log(message,True)
 
-        if cond[0]==0:
-            self.log(message,True)
-            print("Integridad correcta\n",self.data,"\n")
-        elif cond[0]==1:
-            self.log(message,True)
-            print("Fallo replay\n",self.data,"\n")
-        else:
-            self.log(message,True)
-            print("Fallo integridad: %s != %s " %(cond[1], cond[2]),self.request.sendall("ACK from TCP Server".encode()),"\n")
+        if cond[0]==0: print("Integridad correcta\n",self.data,self.request.sendall("ACK from TCP Server".encode()),"\n")
+        elif cond[0]==1: print("Fallo replay\n",self.data,self.request.sendall("Rechazado, Replay detectado".encode()),"\n")
+        else:print("Fallo integridad: %s != %s " %(cond[1], cond[2]),self.request.sendall("Rechazado, MitM detectado".encode()),"\n")
+            
             # Devolvemos el ACK al cliente, confirmando el la llegada del mensaje
-        
-    
     def loadNonces(self) -> list:
         self.nonces = []
         if os.path.exists(conf.NONCE_SERV):
@@ -55,9 +49,8 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
                 self.nonces = pickle.load(f)
 
     def proof(self) -> tuple:
-        hash_old = self.data.split("|")[2].strip()
-        nonce = self.data.split("|")[1].strip()
-        msg = self.data.split("|")[0].strip()
+        msg, nonce, hash_old = self.data.split("|")
+
         hash_new =  hmac.new(self.key.encode(),(msg+nonce).encode(), hashlib.sha256).hexdigest()
 
         if nonce not in self.nonces:
