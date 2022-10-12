@@ -3,28 +3,25 @@ import socket
 import hmac
 import hashlib
 import secrets
-from ssl import ALERT_DESCRIPTION_UNKNOWN_CA
 
 
 key= "123456"
 host_ip, server_port = "127.0.0.1", 9999
 msg = "16272727 17172772 20000"
+msg2= "16272728 17172772 2000000"
 
-class Ataque():
+class Generador():
 
     clave = key
-    nonce = secrets.token_urlsafe()
+    
 
-    def __init__(self, host, port,msg,newmsg= None,replays= 1):
+    def __init__(self, host, port,msg):
         self.host = host
         self.port = port
         self.msg_hmac = hmac.new(key.encode(),msg.encode(), hashlib.sha256).hexdigest()
+        self.nonce = secrets.token_urlsafe()
 
-        if(newmsg!= None): self.data = "|".join([newmsg,self.nonce,self.msg_hmac])
-        else :             self.data = "|".join([msg,self.nonce,self.msg_hmac])
-
-        i=0
-        while(i<replays):
+    def connect(self):
             tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
                 tcp_client.connect((host_ip, server_port))
@@ -35,15 +32,35 @@ class Ataque():
             received = tcp_client.recv(1024)
             tcp_client.close()
             print ("Bytes Enviados:     {}".format(self.data)+ "\nBytes Recibidos: {}".format(received.decode()))
+            
+    def send(self):
+        self.data = "|".join([msg,self.nonce,self.msg_hmac])
+        self.connect()
+
+    def MitM(self,newmsg):
+        self.data = "|".join([newmsg,self.nonce,self.msg_hmac])
+        self.connect()
+
+    def Replay(self,replays):
+        self.data = "|".join([msg,self.nonce,self.msg_hmac])
+        i=0
+        while(i<replays):
+            self.connect()
             i+=1
+
         
 
 
-msg2= "16272728 17172772 2000000"
 
 
-a1= Ataque(host_ip,server_port,msg)             # mensaje normal, realmente no es ningun ataque
 
-a2= Ataque(host_ip,server_port,msg,msg2)       # mensaje alterado por msg2, ataque MitM
+a1=  Generador(host_ip,server_port,msg)            # mensaje normal, realmente no es ningun ataque
+a2 = Generador(host_ip,server_port,msg)
+a3 = Generador(host_ip,server_port,msg)
 
-a3= Ataque(host_ip,server_port,msg,replays=4)  # mensaje repetido x veces, ataque replay
+#print(a1.nonce, a2.nonce, a3.nonce)
+#print(a1.msg_hmac,a2.msg_hmac,a3.msg_hmac)
+
+a1.send()                                       # mensaje normal, realmente no es ningun ataque
+a2.MitM(msg2)                                   # ataque MitM
+a3.Replay(4)                                    # ataque Replays
