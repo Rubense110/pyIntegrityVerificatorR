@@ -14,8 +14,7 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
     """
     Clase servidor TCP.
 
-    Note:   Esta clase hereda de la clase 'socketserver.BaseRequ
-    estHandler'
+    Nota:   Esta clase hereda de la clase 'socketserver.BaseRequestHandler'
             Implementamos el metodo handle para intercambiar datos con el
             cliente.
 
@@ -27,7 +26,6 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
         try: 
             self.loadNonces()
         finally:
-            print("Hemos llegado con: ",self.nonces,"\n")
             with open(conf.NONCE_SERV,"wb") as f:
                 pickle.dump(self.nonces,f)
                 f.close()
@@ -48,7 +46,9 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
         if cond[0]==0:
             message = local_time +" ["+self.client_address[0]+"]"+ " [notice] " + cond[3] 
             print("Integridad correcta\n",self.data)
-            self.request.sendall("ACK from TCP Server".encode())
+
+            # Devolvemos el ACK al cliente, confirmando el la llegada del mensaje
+            self.request.sendall("ACK from TCP Server".encode())                            
 
         elif cond[0]==1: 
             message = local_time +" ["+self.client_address[0]+"]"+ " [rp_error] " + cond[3]
@@ -61,7 +61,7 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
             self.request.sendall("Rechazado, MitM detectado".encode())
 
         self.log(message,True)   
-        # Devolvemos el ACK al cliente, confirmando el la llegada del mensaje
+        
     def loadNonces(self):
         if os.path.exists(conf.NONCE_SERV):
             with open(conf.NONCE_SERV,"rb") as f:
@@ -69,7 +69,7 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
 
     def proof(self) -> tuple:
         msg, nonce, hash_old = self.data.split("|")
-        hash_new =  hmac.new(self.key.encode(),msg.encode(), hashlib.sha256).hexdigest()
+        hash_new =  hmac.new(self.key.encode(),(msg+nonce).encode(), hashlib.sha256).hexdigest()
 
         if nonce not in self.nonces:
             self.nonces.append(nonce)
@@ -103,7 +103,3 @@ if __name__ == "__main__":
     except Exception as e:
         print("Error de apertura servidor: ",e)
     
- #   finally:
- #       print("Hemos llegado con: ",tcp_server.nonces)
- #       with open(conf.NONCE_SERV,"wb") as f:
-#          pickle.dump(tcp_server.nonces,f)
