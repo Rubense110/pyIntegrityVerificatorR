@@ -14,7 +14,8 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
     """
     Clase servidor TCP.
 
-    Note:   Esta clase hereda de la clase 'socketserver.BaseRequestHandler'
+    Note:   Esta clase hereda de la clase 'socketserver.BaseRequ
+    estHandler'
             Implementamos el metodo handle para intercambiar datos con el
             cliente.
 
@@ -44,7 +45,6 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
         print("{} sent:".format(self.client_address[0]))
         message = local_time +" ["+self.client_address[0]+"]"+ " [notice] " + cond[3]
 
-        
         if cond[0]==0:
             message = local_time +" ["+self.client_address[0]+"]"+ " [notice] " + cond[3] 
             print("Integridad correcta\n",self.data)
