@@ -5,10 +5,9 @@ import hashlib
 import time
 import pickle
 import os
+import secrets
 
 import conf
-
-clave = "123456"
 
 class Handler_TCPServer(socketserver.BaseRequestHandler):
     """
@@ -19,28 +18,30 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
             cliente.
 
     """
-    key = clave
+    key = "123456"
     nonces = []
     def __init__(self, request, client_address, server):
         super().__init__(request, client_address, server)
         try: 
-            self.loadNonces()
-        finally:
-            with open(conf.NONCE_SERV,"wb") as f:
-                pickle.dump(self.nonces,f)
-                f.close()
+            self.loadNonces()                               # Cargamos nonces almacenados en el registro del servidor
+                        # Cargamos nonce a enviar al cliente
+        except Exception as e:
+            print("Error en carga Nonces")
+            
 
 
 
     def handle(self):
         
         local_time = time.strftime("[%d/%m/%y %H:%M:%S]", time.localtime())
-
-        #Cargamos el ultimo mensaje recibido al servidor
+        self.nonce = secrets.token_urlsafe()
+        # Cargamos el ultimo mensaje recibido al servidor
         self.data = self.request.recv(1024).strip().decode()
-        #Comprobamos integridad del mensaje recibido
+        # Comprobamos integridad del mensaje recibido
         cond = self.proof()
-        print("{} sent:".format(self.client_address[0]))
+        # Almacenamos los nonces recibidos hasta el momento
+        self.saveNonces()
+        print("\n{} sent:".format(self.client_address[0]))
         message = local_time +" ["+self.client_address[0]+"]"+ " [notice] " + cond[3]
 
         if cond[0]==0:
@@ -48,20 +49,35 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
             print("Integridad correcta\n",self.data)
 
             # Devolvemos el ACK al cliente, confirmando el la llegada del mensaje
-            self.request.sendall("ACK from TCP Server".encode())                            
+            # Envío nonce al cliente
+            msg = "ACK from TCP Server"                         
 
         elif cond[0]==1: 
             message = local_time +" ["+self.client_address[0]+"]"+ " [rp_error] " + cond[3]
             print("Fallo replay\n",self.data)
-            self.request.sendall("Rechazado, Replay detectado".encode())
+
+            # Envío nonce al cliente
+            msg = "Rechazado, Replay detectado"
 
         else:
             message = local_time +" ["+self.client_address[0]+"]"+ " [int_error] " + cond[3]
             print("Fallo integridad: %s != %s " %(cond[1], cond[2]))
-            self.request.sendall("Rechazado, MitM detectado".encode())
 
-        self.log(message,True)   
+            # Envío nonce al cliente
+            msg = "Rechazado, MitM detectado"
+
+        # Hacemos resumen del mensaje y nonce enviado por el servidor para blindar su conexion
         
+        hash_new =  hmac.new(self.key.encode(),(msg+self.nonce).encode(), hashlib.sha256).hexdigest()
+        respuesta =  "|".join([msg,self.nonce,hash_new])
+        self.request.sendall(respuesta.encode())
+        self.log(message,True)   
+    
+    def saveNonces(self):
+        with open(conf.NONCE_SERV,"wb") as f:
+                pickle.dump(self.nonces,f)
+                f.close()
+
     def loadNonces(self):
         if os.path.exists(conf.NONCE_SERV):
             with open(conf.NONCE_SERV,"rb") as f:
@@ -90,9 +106,9 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 9999
-
+    handler_tcp = Handler_TCPServer
     #  Instanciamos el servidor TCP, aplicando el socket correspondiente (ip,puerto)
-    tcp_server = socketserver.TCPServer((HOST, PORT), Handler_TCPServer)
+    tcp_server = socketserver.TCPServer((HOST, PORT), handler_tcp)
 
     # Activamos el servidor TCP.
     # Para abortar el servidor presionar Ctrl-C

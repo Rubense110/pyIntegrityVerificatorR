@@ -3,7 +3,10 @@ import socket
 import hmac
 import hashlib
 import secrets
+import os
+import pickle
 
+import conf
 
 
 
@@ -17,19 +20,51 @@ class Generador():
         self.clave = clave                                                                               # Clave simetrica de cifrado
         self.nonce = secrets.token_urlsafe()                                                             # Nonce unico del mensaje
         self.msg_hmac = hmac.new(clave.encode(),(msg+self.nonce).encode(), hashlib.sha256).hexdigest()   # Resumen MAC del (mensaje+nonce) + clave simetrica
+        self.nonces = []
+        self.loadNonces()
+
 
     # Conexion al servidor
     def connect(self):
-            tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            try:
-                tcp_client.connect((host_ip, server_port))
-            except:
-                print("Servidor inalcanzable")
-                exit(0)
-            tcp_client.sendall(self.data.encode())
-            received = tcp_client.recv(1024)
-            tcp_client.close()
-            print ("Bytes Enviados:     {}".format(self.data)+ "\nBytes Recibidos: {}".format(received.decode()))
+        tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            tcp_client.connect((host_ip, server_port))
+        except:
+            print("Servidor inalcanzable")
+            exit(0)
+        tcp_client.sendall(self.data.encode())
+        self.received = tcp_client.recv(1024)
+        tcp_client.close()
+
+        print ("\nBytes Enviados:     {}".format(self.data)+ "\nBytes Recibidos: {}".format(self.received.decode()))
+        cond = self.proof()
+        if cond==0:
+            print("Integridad correcta")
+        elif cond==1:
+            print("Incidencia de tipo 'Reply' detectada")
+        else:
+            print("Incidencia de tipo 'Integridad' detectada")
+        
+        with open(conf.NONCE_CLNT,"wb") as f:
+            pickle.dump(self.nonces,f)
+            f.close()
+
+
+    def loadNonces(self):
+        if os.path.exists(conf.NONCE_CLNT):
+            with open(conf.NONCE_CLNT,"rb") as f:
+                self.nonces = pickle.load(f)
+
+    def proof(self) -> int:
+        msg, nonce, hash_old = self.received.decode().split("|")
+        hash_new =  hmac.new(self.clave.encode(),(msg+nonce).encode(), hashlib.sha256).hexdigest()
+
+        if nonce not in self.nonces:
+            self.nonces.append(nonce)
+            if hash_old==hash_new: res = 0
+            else: res = 2
+        else: res = 1
+        return res
 
     # Metodo para envio normal       
     def send(self):
