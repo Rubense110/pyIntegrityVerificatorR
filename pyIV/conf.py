@@ -9,3 +9,4 @@ LOGS = os.path.join(PATH,"logs","log.txt")
 NONCE_SERV = os.path.join(PATH,"nonces","nonces_serv")
 #Path para base de nonces cliente
 NONCE_CLNT = os.path.join(PATH,"nonces","nonces_clnt")
+ERROR_SERV = os.path.join(PATH,"logs","error_log.txt")
