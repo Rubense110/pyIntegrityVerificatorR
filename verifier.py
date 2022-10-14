@@ -9,7 +9,7 @@ ncliente = conf.NONCE_CLNT
 nserver = conf.NONCE_SERV
 clave = "123456"
 
-class verificador:
+class Verifier():
     def __init__(self, data, sv= False):    # IMPORTANTE: No alterar el orden de los atributos y metodos en el constructor
         self.nonces = []
         self.basenonces = ncliente if sv == False else nserver

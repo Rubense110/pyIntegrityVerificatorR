@@ -3,9 +3,9 @@ import hmac
 import hashlib
 import secrets
 
-from verificador import verificador
+from verifier import Verifier
 
-class Generador():
+class Generator():
 
     def __init__(self, host, port,msg,clave):
         self.host = host                                                                                 # Host
@@ -28,7 +28,7 @@ class Generador():
 
         print ("\nBytes Enviados:     {}".format(self.data)+ "\nBytes Recibidos:    {}".format(self.received.decode()))
         print ("Server replay :     ", self.received.decode().split("|")[0])
-        verificador(self.received.decode())
+        Verifier(self.received.decode())
 
            
     def send(self):
@@ -52,9 +52,9 @@ if __name__ == "__main__":
     msg = "16272727 17172772 20000"
     msg2= "16272728 17172772 2000000"
 
-    a1 = Generador(host_ip,server_port,msg,key)            
-    a2 = Generador(host_ip,server_port,msg,key)
-    a3 = Generador(host_ip,server_port,msg,key) 
+    a1 = Generator(host_ip,server_port,msg,key)            
+    a2 = Generator(host_ip,server_port,msg,key)
+    a3 = Generator(host_ip,server_port,msg,key) 
 
     a1.send()                                       # mensaje normal, realmente no es ningun ataque
     a2.mitM(msg2)                                   # ataque MitM
