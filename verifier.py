@@ -35,7 +35,7 @@ class Verifier():
 
         else:
             if res==0:      print("Integridad correcta\n")       
-            elif res==1:    print("Incidencia de tipo 'Reply' detectada\n")
+            elif res==1:    print("Incidencia de tipo 'Replay' detectada\n")
             else:           print("Incidencia de tipo 'Integridad' detectada\n")
 
         self.WritteNonces()

@@ -1,8 +1,11 @@
+from copyreg import pickle
 import socketserver
 import hmac
 import hashlib
 import time
 import secrets
+import random
+import pickle
 
 import conf
 from verifier import Verifier
@@ -34,11 +37,35 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
         
         msg= verificator.msgSv
 
-        hash_new =  hmac.new(verificator.key.encode(),(msg+self.nonce).encode(), hashlib.sha256).hexdigest() # Hacemos resumen del mensaje y nonce enviado por el servidor
-        respuesta =  "|".join([msg,self.nonce,hash_new])
-        self.request.sendall(respuesta.encode())    # Enviamos la respuesta del servidor
-        self.log(message,True)  
-        print("Server reply :",msg) 
+        x = random.random()
+
+        if x<1/3:
+            # Respuesta normal
+            hash_new =  hmac.new(verificator.key.encode(),(msg+self.nonce).encode(), hashlib.sha256).hexdigest() # Hacemos resumen del mensaje y nonce enviado por el servidor
+            respuesta =  "|".join([msg,self.nonce,hash_new])
+            self.request.sendall(respuesta.encode())    # Enviamos la respuesta del servidor
+            self.log(message,True)  
+            print("Server reply :",msg) 
+
+        elif x>= 1/3 and x<2/3:
+            # Ataque MitM servidor-cliente
+            hash_new =  hmac.new(verificator.key.encode(),(msg+self.nonce).encode(), hashlib.sha256).hexdigest() # Hacemos resumen del mensaje y nonce enviado por el servidor
+            msg2 = msg+"00"
+            respuesta =  "|".join([msg2,self.nonce,hash_new])
+            self.request.sendall(respuesta.encode())    # Enviamos la respuesta del servidor
+            self.log(message,True)  
+            print("Server reply :",msg) 
+
+        else:
+            # Ataque replay servidor-cliente
+            with open(conf.NONCE_CLNT, "rb") as f:
+                nonce_client = pickle.load(f)[-1]
+                f.close()
+            hash_new =  hmac.new(verificator.key.encode(),(msg+nonce_client).encode(), hashlib.sha256).hexdigest() # Hacemos resumen del mensaje y nonce enviado por el servidor
+            respuesta =  "|".join([msg,nonce_client,hash_new])
+            self.request.sendall(respuesta.encode())    # Enviamos la respuesta del servidor
+            self.log(message,True)  
+            print("Server reply :",msg)
     
     def log(self,mensaje,display=False):
         """
