@@ -5,7 +5,7 @@ import time
 import secrets
 
 import conf
-from verificador import verificador
+from verifier import Verifier
 
 class Handler_TCPServer(socketserver.BaseRequestHandler):
     """
@@ -29,7 +29,7 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
         self.data = self.request.recv(1024).strip().decode()     # Cargamos el ultimo mensaje recibido al servidor
         
         print("\n{} sent:".format(self.client_address[0]))
-        verificator = verificador(self.data, sv= True)          # Comprobamos integridad del mensaje recibido
+        verificator = Verifier(self.data, sv= True)          # Comprobamos integridad del mensaje recibido
         message = local_time +" ["+self.client_address[0]+"]"+ verificator.logData + self.data.split("|")[0]
         
         msg= verificator.msgSv
