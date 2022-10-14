@@ -1,2 +1,2 @@
-# pyIntegrityVerificator
-Verificador de integridad en conexión TCP cliente-servidor
+# pyIntegrityVerifier
+Integrity Verifier between TCP client-server connection.
