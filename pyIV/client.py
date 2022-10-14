@@ -20,14 +20,14 @@ class Generator():
         try:
             tcp_client.connect((host_ip, server_port))
         except:
-            print("Servidor inalcanzable")
+            print("Unreachable Server")
             exit(0)
         tcp_client.sendall(self.data.encode())
         self.received = tcp_client.recv(1024)
         tcp_client.close()
 
-        print ("\nBytes Enviados:     {}".format(self.data)+ "\nBytes Recibidos:    {}".format(self.received.decode()))
-        print ("Server reply :     ", self.received.decode().split("|")[0])
+        print ("\nBytes Sent:       {}".format(self.data)+ "\nBytes Received:   {}".format(self.received.decode()))
+        print ("Server Response: ", self.received.decode().split("|")[0])
         Verifier(self.received.decode())
 
            

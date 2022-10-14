@@ -45,7 +45,7 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
         if attack == True:
             x = random.random()
             if(x<1/3): 
-                self.msg2 = self.msg+" THEMANISHERE"
+                self.msg2 = self.msg+" theMANisHERE"
             elif x>= 1/3 and x<2/3: 
                 with open(conf.NONCE_CLNT, "rb") as f:
                     self.nonce = pickle.load(f)[-1]
@@ -55,7 +55,7 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
         respuesta =  "|".join([self.msg2,self.nonce,hash_new])
         self.request.sendall(respuesta.encode())    # Enviamos la respuesta del servidor
         self.log(self.message,True)  
-        print("Server reply :",self.msg2) 
+        print("Server response: ",self.msg2) 
 
 
     def log(self,mensaje,display=False):

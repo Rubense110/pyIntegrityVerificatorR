@@ -34,9 +34,9 @@ class Verifier():
             else:           self.msgSv = "MitM detected from [C]";   self.logData = " [int_error] "
 
         else:   # Client
-            if res==0:      print("Integrity verified. Everything is fine!\n")       
-            elif res==1:    print("Replay detected from [S]\n")
-            else:           print("MitM detected from [S]\n")
+            if res==0:      print("####### Server response integrity is fine! #######\n")       
+            elif res==1:    print("####### Replay detected from [S] #######\n")
+            else:           print("####### MitM detected from [S] #######\n")
 
         self.WritteNonces()
 
