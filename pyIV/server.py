@@ -39,13 +39,13 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
         self.reply()
     
     def reply(self):
-        atack = True
+        attack = True
         self.msg2 = self.msg
 
-        if atack == True:
+        if attack == True:
             x = random.random()
             if(x<1/3): 
-                self.msg2 = self.msg+"00"
+                self.msg2 = self.msg+" THEMANISHERE"
             elif x>= 1/3 and x<2/3: 
                 with open(conf.NONCE_CLNT, "rb") as f:
                     self.nonce = pickle.load(f)[-1]

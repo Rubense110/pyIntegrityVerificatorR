@@ -28,15 +28,15 @@ class Verifier():
             else: res = 2
         else: res = 1
 
-        if self.basenonces == nserver :
-            if res==0:      self.msgSv = "ACK from TCP Server";         self.logData = " [notice] "
-            elif res==1:    self.msgSv = "Rechazado, Replay detectado"; self.logData = " [rp_error] "
-            else:           self.msgSv = "Rechazado, MitM detectado";   self.logData = " [int_error] "
+        if self.basenonces == nserver : # Server
+            if res==0:      self.msgSv = "ACK from TCP [S]";         self.logData = " [notice] "
+            elif res==1:    self.msgSv = "Replay detected from [C]"; self.logData = " [rp_error] " # [who_made_the_attack]
+            else:           self.msgSv = "MitM detected from [C]";   self.logData = " [int_error] "
 
-        else:
-            if res==0:      print("Integridad correcta\n")       
-            elif res==1:    print("Incidencia de tipo 'Replay' detectada\n")
-            else:           print("Incidencia de tipo 'Integridad' detectada\n")
+        else:   # Client
+            if res==0:      print("Integrity verified. Everything is fine!\n")       
+            elif res==1:    print("Replay detected from [S]\n")
+            else:           print("MitM detected from [S]\n")
 
         self.WritteNonces()
 
