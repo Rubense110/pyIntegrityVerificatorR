@@ -1,1 +1,1 @@
-1.- Este readme tiene como proposito la persistencia de la carpeta 'nonces'
+The purpose of this readme is the persistence of the 'nonces' folder.

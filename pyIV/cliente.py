@@ -27,7 +27,7 @@ class Generador():
         tcp_client.close()
 
         print ("\nBytes Enviados:     {}".format(self.data)+ "\nBytes Recibidos:    {}".format(self.received.decode()))
-        print ("Server reply :     ", self.received.decode().split("|")[0])
+        print ("Server replay :     ", self.received.decode().split("|")[0])
         verificador(self.received.decode())
 
            
