@@ -29,9 +29,9 @@ class Verifier():
         else: res = 1
 
         if self.basenonces == nserver : # Server
-            if res==0:      self.msgSv = "ACK from TCP [S]";         self.logData = " [notice] "
-            elif res==1:    self.msgSv = "Replay detected from [C]"; self.logData = " [rp_error] " # [who_made_the_attack]
-            else:           self.msgSv = "MitM detected from [C]";   self.logData = " [int_error] "
+            if res==0:      self.msgSv = ("ACK from TCP [S]",0);         self.logData = " [notice] "
+            elif res==1:    self.msgSv = ("Replay detected from [C]",1); self.logData = " [rp_error] " # [who_made_the_attack]
+            else:           self.msgSv = ("MitM detected from [C]",2);   self.logData = " [int_error] "
 
         else:   # Client
             if res==0:      print("####### Server response integrity is fine! #######\n")       

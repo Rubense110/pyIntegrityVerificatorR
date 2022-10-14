@@ -6,6 +6,7 @@ import time
 import secrets
 import random
 import pickle
+import os
 
 import conf
 from verifier import Verifier
@@ -22,11 +23,46 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
 
     def __init__(self, request, client_address, server):
         super().__init__(request, client_address, server )
-        
+
+ 
+    def errorfile(self):
+        if os.path.exists(conf.ERROR_SERV):
+            pass
+
+        else:
+            with open(conf.ERROR_SERV,"w") as f:
+                f.write("err_integridad : 0\nerr_replay : 0")
+                f.close()
+
+    def writte_error(self):
+        errores = [self.err_int,self.err_rep]
+        replacement = ""
+        lineas = list()
+
+        err_file = open(conf.ERROR_SERV, "r")
+        for line in err_file: lineas.append(line.split(":")[0])
             
+        cambios = [lineas[m] + " : " + str(c) for m,c in (range(len(lineas)), errores)]
+        cambios.trim()   
+        replacement+= cambios[0]+"\n"+cambios[1]
+        err_file.close()
+
+        fout = open(conf.ERROR_SERV, "w+")
+        fout.write(replacement)
+        fout.close()
+
+
+        ### TO-DO LISTT 
+        ### PDF, NOTIFICACIÓN
+        ### CONSOLA SERVER
+        ### REORGANIZAR ERR_INT Y ERR_REP Y BUENA INICIALIZACION
+        ### REORGANIZAR CÓDIGO
+        ### PASAR T O D O  A INGLÉS
 
     def handle(self):
-        
+        self.errorfile()
+        self.err_int = 0
+        self.err_rep = 0
         local_time = time.strftime("[%d/%m/%y %H:%M:%S]", time.localtime())
 
         self.nonce = secrets.token_urlsafe()
@@ -35,9 +71,15 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
         print("\n{} sent:".format(self.client_address[0]))
         self.verificator = Verifier(self.data, sv= True)          # Comprobamos integridad del mensaje recibido
         self.message = local_time +" ["+self.client_address[0]+"]"+ self.verificator.logData + self.data.split("|")[0]
-        self.msg= self.verificator.msgSv
+        self.msg= self.verificator.msgSv[0]
+
+        if self.verificator.msgSv[1] == 0: pass
+        elif self.verificator.msgSv[1] == 1: self.err_rep +=1
+        else : self.err_int +=1
+
         self.reply()
-    
+        self.writte_error()
+
     def reply(self):
         attack = True
         self.msg2 = self.msg
