@@ -17,7 +17,10 @@ class Reports():
         self.report_data()
         self.craft_graphic()
         self.craft_pdf()
-        self.craft_email()
+        try:
+            self.craft_email()
+        except:
+            print("error enviando email")
 
     def report_data(self):
         with open(conf.LOGS, "r") as f:
@@ -81,10 +84,8 @@ class Reports():
         message.attach(payload)
 
         connection = smtplib.SMTP(host="localhost",port= 2500)
-        try: 
-            connection.sendmail(from_addr="mail@attacks.pai", to_addrs="sysadmin@attacks.com",msg=message.as_string())
-        except:
-            print("error enviando un email")
+        connection.sendmail(from_addr="mail@attacks.pai", to_addrs="sysadmin@attacks.com",msg=message.as_string())
+
         connection.quit()
         
 Reports()
