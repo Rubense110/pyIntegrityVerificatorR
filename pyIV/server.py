@@ -13,71 +13,60 @@ from verifier import Verifier
 
 class Handler_TCPServer(socketserver.BaseRequestHandler):
     """
-    Clase servidor TCP.
+    TCP Server class.
 
-    Nota:   Esta clase hereda de la clase 'socketserver.BaseRequestHandler'
-            Implementamos el metodo handle para intercambiar datos con el
-            cliente.
-
+    Note:   This class inherits from the class 'socketserver.BaseRequestHandler'.
+            We implement the handle method to exchange data with the client.
     """
-
     def __init__(self, request, client_address, server):
-        super().__init__(request, client_address, server )
+        super().__init__(request, client_address, server)
 
- 
-    def errorfile(self):
+    def handle(self): 
+        self.error_file()
+        local_time = time.strftime("[%d/%m/%y %H:%M:%S]", time.localtime())
+
+        self.nonce = secrets.token_urlsafe()
+        self.data = self.request.recv(1024).strip().decode()   # Last message received is loaded  
+        
+        print("\n{} sent:".format(self.client_address[0]))
+        self.verif = Verifier(self.data, sv= True)          # Integrity check of the received message
+        self.message = local_time +" ["+self.client_address[0]+"]"+ self.verif.logData + self.data.split("|")[0]
+        self.msg= self.verif.msgSv[0]
+
+        if self.verif.msgSv[1] == 0: pass
+        elif self.verif.msgSv[1] == 1: self.err_rep +=1
+        else: self.err_mitm +=1
+
+        self.server_response()
+        self.write_error()
+    
+    def error_file(self): # Error log file
         if os.path.exists(conf.ERROR_SERV):
             f = open(conf.ERROR_SERV, "r")
-            lista_errores = [l.split(":")[1].strip() for l in f]
-            self.err_int = int(lista_errores[0])
-            self.err_rep = int(lista_errores[1])
+            errors_list = [l.split(":")[1].strip() for l in f]
+            self.err_mitm = int(errors_list[0])
+            self.err_rep = int(errors_list[1])
             f.close()
         else:
             with open(conf.ERROR_SERV,"w") as f:
-                f.write("err_integridad : 0\nerr_replay : 0")
+                f.write("mitm_error : 0\nreplay_error : 0")
                 f.close()
     
-    def writte_error(self):
-        errores =[self.err_int, self.err_rep]
+    def write_error(self): # Accumulative errors
+        errors =[self.err_mitm, self.err_rep]
         replacement = ""
-        fread = open(conf.ERROR_SERV, "r")
+        f_read = open(conf.ERROR_SERV, "r")
         i =0
-        for line in fread.readlines():
-            linealista = line.split(":")
-            replacement += linealista[0]+": "+ str(errores[i])+"\n"
+        for line in f_read.readlines():
+            s_line = line.split(":")
+            replacement += s_line[0]+": "+ str(errors[i])+"\n"
             i+=1
-        fread.close()
+        f_read.close()
         fout = open(conf.ERROR_SERV, "w+")
         fout.write(replacement)
         fout.close()
 
-        ### TO-DO LISTT 
-        ### PDF, NOTIFICACIÓN
-        ### CONSOLA SERVER
-        ### REORGANIZAR ERR_INT Y ERR_REP Y BUENA INICIALIZACION
-        ### REORGANIZAR CÓDIGO
-        ### PASAR T O D O  A INGLÉS
-
-    def handle(self):
-        self.errorfile()
-        local_time = time.strftime("[%d/%m/%y %H:%M:%S]", time.localtime())
-
-        self.nonce = secrets.token_urlsafe()
-        self.data = self.request.recv(1024).strip().decode()     # Cargamos el ultimo mensaje recibido al servidor
-        
-        print("\n{} sent:".format(self.client_address[0]))
-        self.verificator = Verifier(self.data, sv= True)          # Comprobamos integridad del mensaje recibido
-        self.message = local_time +" ["+self.client_address[0]+"]"+ self.verificator.logData + self.data.split("|")[0]
-        self.msg= self.verificator.msgSv[0]
-
-        if self.verificator.msgSv[1] == 0: pass
-        elif self.verificator.msgSv[1] == 1: self.err_rep +=1
-        else : self.err_int +=1
-
-        self.reply()
-        self.writte_error()
-
-    def reply(self):
+    def server_response(self):
         attack = True
         self.msg2 = self.msg
 
@@ -90,16 +79,15 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
                     self.nonce = pickle.load(f)[-1]
                     f.close()
         
-        hash_new =  hmac.new(self.verificator.key.encode(),(self.msg+self.nonce).encode(), hashlib.sha256).hexdigest() # Hacemos resumen del mensaje y nonce enviado por el servidor
-        respuesta =  "|".join([self.msg2,self.nonce,hash_new])
-        self.request.sendall(respuesta.encode())    # Enviamos la respuesta del servidor
+        hash_new =  hmac.new(self.verif.key.encode(),(self.msg+self.nonce).encode(), hashlib.sha256).hexdigest()
+        response =  "|".join([self.msg2,self.nonce,hash_new])
+        self.request.sendall(response.encode())
         self.log(self.message,True)  
-        print("Server response: ",self.msg2) 
-
+        print("Server Response: ",self.msg2) 
 
     def log(self,mensaje,display=False):
         """
-        Devuelve por consola y escribe el log en el log file.
+        Returns by console and writes the log in the log file.
         """
         if display: print(mensaje)        
         with open(conf.LOGS, 'a') as f:

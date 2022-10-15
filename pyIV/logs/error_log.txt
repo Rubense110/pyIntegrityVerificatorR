@@ -1,2 +1,0 @@
-err_integridad : 2
-err_replay : 6

@@ -5,17 +5,19 @@ import secrets
 
 from verifier import Verifier
 
-class Generator():
+class Handler_TCPClient():
+    """
+    TCP Client class.
+    """
+    def __init__(self, host, port, msg, key):
+        self.host = host                                                                                 
+        self.port = port                                                                                 
+        self.msg = msg                                                                                   
+        self.key = key                                                                                   
+        self.nonce = secrets.token_urlsafe()                                                             
+        self.msg_hmac = hmac.new(key.encode(),(msg+self.nonce).encode(), hashlib.sha256).hexdigest()
 
-    def __init__(self, host, port,msg,clave):
-        self.host = host                                                                                 # Host
-        self.port = port                                                                                 # Puerto
-        self.msg = msg                                                                                   # Mensaje a mandar
-        self.clave = clave                                                                               # Clave simetrica de cifrado
-        self.nonce = secrets.token_urlsafe()                                                             # Nonce unico del mensaje
-        self.msg_hmac = hmac.new(clave.encode(),(msg+self.nonce).encode(), hashlib.sha256).hexdigest()   # Resumen MAC del (mensaje+nonce) + clave simetrica
-
-    def connect(self):    # Conexion al servidor
+    def connect(self):  # Server connection
         tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             tcp_client.connect((host_ip, server_port))
@@ -30,16 +32,15 @@ class Generator():
         print ("Server Response: ", self.received.decode().split("|")[0])
         Verifier(self.received.decode())
 
-           
-    def send(self):
+    def send(self): # Normal message
         self.data = "|".join([msg,self.nonce,self.msg_hmac])
         self.connect()
     
-    def mitM(self,newmsg):     
+    def mitM(self,newmsg):  # MitM attack
         self.data = "|".join([newmsg,self.nonce,self.msg_hmac])
         self.connect()
     
-    def replay(self,replays):   
+    def replay(self,replays):   # Replay attack
         self.data = "|".join([msg,self.nonce,self.msg_hmac])
         i=0
         while(i<replays):
@@ -52,10 +53,10 @@ if __name__ == "__main__":
     msg = "16272727 17172772 20000"
     msg2= "16272728 17172772 2000000"
 
-    a1 = Generator(host_ip,server_port,msg,key)            
-    a2 = Generator(host_ip,server_port,msg,key)
-    a3 = Generator(host_ip,server_port,msg,key) 
+    a1 = Handler_TCPClient(host_ip,server_port,msg,key)            
+    a2 = Handler_TCPClient(host_ip,server_port,msg,key)
+    a3 = Handler_TCPClient(host_ip,server_port,msg,key) 
 
-    a1.send()                                       # mensaje normal, realmente no es ningun ataque
-    a2.mitM(msg2)                                   # ataque MitM
-    a3.replay(4)                                    # ataque Replays
+    a1.send()                                       # Message 
+    a2.mitM(msg2)                                   # MitM attack
+    a3.replay(4)                                    # Replay attack
