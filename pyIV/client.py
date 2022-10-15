@@ -17,7 +17,7 @@ class Handler_TCPClient():
         self.nonce = secrets.token_urlsafe()                                                             
         self.msg_hmac = hmac.new(key.encode(),(msg+self.nonce).encode(), hashlib.sha256).hexdigest()
 
-    def connect(self):  # Server connection
+    def connect(self):    # Server connection
         tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             tcp_client.connect((host_ip, server_port))
@@ -32,16 +32,16 @@ class Handler_TCPClient():
         print ("Server Response: ", self.received.decode().split("|")[0])
         Verifier(self.received.decode())
 
-    def send(self): # Normal message
-        self.data = "|".join([msg,self.nonce,self.msg_hmac])
+    def send(self):    # Normal message
+        self.data = "|".join([self.msg,self.nonce,self.msg_hmac])
         self.connect()
     
-    def mitm(self,newmsg):  # MitM attack
+    def mitm(self,newmsg):    # MitM attack
         self.data = "|".join([newmsg,self.nonce,self.msg_hmac])
         self.connect()
     
-    def replay(self,replays):   # Replay attack
-        self.data = "|".join([msg,self.nonce,self.msg_hmac])
+    def replay(self,replays):    # Replay attack
+        self.data = "|".join([self.msg,self.nonce,self.msg_hmac])
         i=0
         while(i<replays):
             self.connect()

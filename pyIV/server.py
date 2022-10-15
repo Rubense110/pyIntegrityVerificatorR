@@ -22,47 +22,47 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
         super().__init__(request, client_address, server)
     
     def handle(self): 
-        self.error_file()
+        self.attack_file()
         local_time = time.strftime("[%d/%m/%y %H:%M:%S]", time.localtime())
 
         self.nonce = secrets.token_urlsafe()
-        self.data = self.request.recv(1024).strip().decode()   # Last message received is loaded  
+        self.data = self.request.recv(1024).strip().decode()    # Last message received is loaded  
         
         print("\n{} sent:".format(self.client_address[0]))
-        self.verif = Verifier(self.data, sv= True)          # Integrity check of the received message
-        self.message = local_time +" ["+self.client_address[0]+"]"+ self.verif.logData + self.data.split("|")[0]
+        self.verif = Verifier(self.data, sv= True)    # Integrity check of the received message
+        self.message = local_time +" [SRC_IP: "+self.client_address[0]+"]"+ self.verif.logData + self.data.split("|")[0]
         self.msg= self.verif.msgSv[0]
 
         if self.verif.msgSv[1] == 0: pass
-        elif self.verif.msgSv[1] == 1: self.err_rep +=1
-        else: self.err_mitm +=1
+        elif self.verif.msgSv[1] == 1: self.rep_att +=1
+        else: self.mitm_att +=1
 
         self.server_response()
-        self.write_error()
+        self.write_attack()
 
-    def error_file(self): # Error log file
-        if os.path.exists(conf.ERROR_SERV):
-            f = open(conf.ERROR_SERV, "r")
-            errors_list = [l.split(":")[1].strip() for l in f]
-            self.err_mitm = int(errors_list[0])
-            self.err_rep = int(errors_list[1])
+    def attack_file(self):    # Attack log file
+        if os.path.exists(conf.ATTS_FROM_C_TO_S):
+            f = open(conf.ATTS_FROM_C_TO_S, "r")
+            attack_list = [l.split(":")[1].strip() for l in f]
+            self.mitm_att = int(attack_list[0])
+            self.rep_att = int(attack_list[1])
             f.close()
         else:
-            with open(conf.ERROR_SERV,"w") as f:
-                f.write("mitm_error : 0\nreplay_error : 0")
+            with open(conf.ATTS_FROM_C_TO_S,"w") as f:
+                f.write("mitm_att : 0\nreplay_att : 0")
                 f.close()
     
-    def write_error(self): # Accumulative errors
-        errors =[self.err_mitm, self.err_rep]
+    def write_attack(self):    # Accumulative attacks
+        attacks =[self.mitm_att, self.rep_att]
         replacement = ""
-        f_read = open(conf.ERROR_SERV, "r")
+        f_read = open(conf.ATTS_FROM_C_TO_S, "r")
         i =0
         for line in f_read.readlines():
             s_line = line.split(":")
-            replacement += s_line[0]+": "+ str(errors[i])+"\n"
+            replacement += s_line[0]+": "+ str(attacks[i])+"\n"
             i+=1
         f_read.close()
-        fout = open(conf.ERROR_SERV, "w+")
+        fout = open(conf.ATTS_FROM_C_TO_S, "w+")
         fout.write(replacement)
         fout.close()
 

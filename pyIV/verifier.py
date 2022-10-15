@@ -5,17 +5,20 @@ import os
 
 import conf
 
-ncliente = conf.NONCE_CLNT
+nclient = conf.NONCE_CLNT
 nserver = conf.NONCE_SERV
-clave = "123456"
+key = "123456"
 
 class Verifier():
-    def __init__(self, data, sv= False):    # IMPORTANTE: No alterar el orden de los atributos y metodos en el constructor
+    """
+    This class verifies the integrity (detects MitM attacks and Replay attacks) in a TCP connection.
+    """
+    def __init__(self, data, sv = False):    # WARNING: Do not change the attributes order or constructor methods
         self.nonces = []
-        self.basenonces = ncliente if sv == False else nserver
+        self.basenonces = nclient if sv == False else nserver
         self.loadNonces()
         self.data = data
-        self.key = clave
+        self.key = key
         self.proof()
 
     def proof(self):
@@ -28,12 +31,12 @@ class Verifier():
             else: res = 2
         else: res = 1
 
-        if self.basenonces == nserver : # Server
-            if res==0:      self.msgSv = ("ACK from TCP [S]",0);         self.logData = " [notice] "
-            elif res==1:    self.msgSv = ("Replay detected from [C]",1); self.logData = " [rp_error] " # [who_made_the_attack]
-            else:           self.msgSv = ("MitM detected from [C]",2);   self.logData = " [int_error] "
+        if self.basenonces == nserver :    # Server
+            if res==0:      self.msgSv = ("ACK from TCP [S]",0);         self.logData = " [fine] "
+            elif res==1:    self.msgSv = ("Replay detected from [C]",1); self.logData = " [replay_att] " # [who_made_the_attack]
+            else:           self.msgSv = ("MitM detected from [C]",2);   self.logData = " [mitm_att] "
 
-        else:   # Client
+        else:    # Client
             if res==0:      print("####### Server response integrity is fine! #######\n")       
             elif res==1:    print("####### Replay detected from [S] #######\n")
             else:           print("####### MitM detected from [S] #######\n")
