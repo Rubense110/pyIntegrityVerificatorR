@@ -1,2 +1,0 @@
-mitm_error : 12
-replay_error : 40

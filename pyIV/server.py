@@ -51,7 +51,9 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
             with open(conf.ATTS_FROM_C_TO_S,"w") as f:
                 f.write("mitm_att : 0\nreplay_att : 0")
                 f.close()
-    
+            self.mitm_att = 0
+            self.rep_att = 0
+
     def write_attack(self):    # Accumulative attacks
         attacks =[self.mitm_att, self.rep_att]
         replacement = ""
