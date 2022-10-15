@@ -27,30 +27,29 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
  
     def errorfile(self):
         if os.path.exists(conf.ERROR_SERV):
-            pass
-
+            f = open(conf.ERROR_SERV, "r")
+            lista_errores = [l.split(":")[1].strip() for l in f]
+            self.err_int = int(lista_errores[0])
+            self.err_rep = int(lista_errores[1])
+            f.close()
         else:
             with open(conf.ERROR_SERV,"w") as f:
                 f.write("err_integridad : 0\nerr_replay : 0")
                 f.close()
-
+    
     def writte_error(self):
-        errores = [self.err_int,self.err_rep]
+        errores =[self.err_int, self.err_rep]
         replacement = ""
-        lineas = list()
-
-        err_file = open(conf.ERROR_SERV, "r")
-        for line in err_file: lineas.append(line.split(":")[0])
-            
-        cambios = [lineas[m] + " : " + str(c) for m,c in (range(len(lineas)), errores)]
-        cambios.trim()   
-        replacement+= cambios[0]+"\n"+cambios[1]
-        err_file.close()
-
+        fread = open(conf.ERROR_SERV, "r")
+        i =0
+        for line in fread.readlines():
+            linealista = line.split(":")
+            replacement += linealista[0]+": "+ str(errores[i])+"\n"
+            i+=1
+        fread.close()
         fout = open(conf.ERROR_SERV, "w+")
         fout.write(replacement)
         fout.close()
-
 
         ### TO-DO LISTT 
         ### PDF, NOTIFICACIÓN
@@ -61,8 +60,6 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
 
     def handle(self):
         self.errorfile()
-        self.err_int = 0
-        self.err_rep = 0
         local_time = time.strftime("[%d/%m/%y %H:%M:%S]", time.localtime())
 
         self.nonce = secrets.token_urlsafe()
@@ -121,4 +118,3 @@ if __name__ == "__main__":
 
     except Exception as e:
         print("Error de apertura servidor: ",e)
-    
