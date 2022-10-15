@@ -22,7 +22,7 @@ class Reports():
     def report_data(self):
         with open(conf.LOGS, "r") as f:
             self.date = f.readlines()[-1].split(" ")[0].replace("/","-").strip("[")
-            f = open(conf.ERROR_SERV).readlines() 
+            f = open(conf.ATTS_FROM_C_TO_S).readlines() 
             self.mitm_att, self.rep_att = (int(f[i].split(":")[1].strip()) for i in range(2))
             self.accesses = len(open(conf.LOGS, "r").readlines())-1
             self.accesses_na = self.accesses - ((self.mitm_att) +self.rep_att)
@@ -39,7 +39,7 @@ class Reports():
         labels = ['{0} - {1:1.2f} %'.format(i,j) for i,j in zip(legend, percentages)]
         plt.figure(figsize=(7,3))
         plt.pie(values,startangle=90,shadow=True,explode=explode,colors=colors)
-        plt.title("Server acceses\n",fontdict=f1)
+        plt.title("Transmissions\n",fontdict=f1)
         plt.legend(labels,loc="upper left",fontsize="x-small")
         plt.axis("equal")
         plt.savefig(os.path.join(conf.GRAPH_FOLDER,"graphic"+self.date+".png"),bbox_inches='tight',dpi=300)
@@ -50,7 +50,7 @@ class Reports():
         pdf.add_page()
         pdf.set_font('Times', 'B', 40)
         pdf.cell(200, 10, txt = "",ln = 1, align = 'C')
-        pdf.cell(200, 10, txt = "INSEGUS INTEGRITY CHECK",ln = 1, align = 'C')
+        pdf.cell(200, 10, txt = "INSEGUS \n INTEGRITY CHECK",ln = 1, align = 'C')
         pdf.set_font('Times', 'B', 16)
         pdf.cell(200, 10, txt = "Report "+self.date+"\n\n" ,ln = 1, align = 'C')
         pdf.image(os.path.join(conf.GRAPH_FOLDER, "graphic"+self.date+".png"),20,50, h=100,w=180)
@@ -58,11 +58,11 @@ class Reports():
         pdf.set_left_margin(32)
         pdf.set_font("Times",style="")
         pdf.cell(200, 20, txt = "",ln = 1, align = 'C')
-        pdf.cell(200, 10, txt = "· Nº of Man in the Middle Attacks detected: "+str(self.mitm_att),ln = 1, align = 'L')
-        pdf.cell(200, 10, txt = "· Nº of Replay Attacks detected: "+str(self.rep_att),ln = 1, align = 'L')
+        pdf.cell(200, 10, txt = "· Nº of Man in the Middle attacks detected: "+str(self.mitm_att),ln = 1, align = 'L')
+        pdf.cell(200, 10, txt = "· Nº of Replay attacks detected: "+str(self.rep_att),ln = 1, align = 'L')
         pdf.cell(200, 10, txt = "· Nº of total transmissions: "+str(self.accesses),ln = 1, align = 'L')
-        pdf.cell(200, 10, txt = "· KPI = transmissions w/o attacks / total transmissions",ln = 1, align = 'L')
-        pdf.cell(200, 10, txt = "· Percentage of attacks (KPI): "+str("{:%}".format(percentage)),ln = 1, align = 'L')
+        pdf.cell(200, 10, txt = "· KPI = (transmissions w/o attacks) / total transmissions",ln = 1, align = 'L')
+        pdf.cell(200, 10, txt = "· Percentage of transmissions w/o attacks (KPI): "+str("{:%}".format(percentage)),ln = 1, align = 'L')
         pdf.output(os.path.join(conf.PDF_FOLDER,"report-"+self.date+".pdf"), "F")
 
     def craft_email(self):
