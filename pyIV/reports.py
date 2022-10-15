@@ -29,7 +29,6 @@ class Reports():
 
     def craft_graphic(self):
         values = [self.accesses_na, self.mitm_att, self.rep_att]
-        print(self.date)
         legend = ["Transmissions w/o attacks", "Man in the Middle attacks", "Replay attacks"]
         f1 = {"family": "Arial","color": "black", "size": 20, "fontweight": "roman"}
         colors = ["lightskyblue", "lightcoral", "gold"]
@@ -82,7 +81,10 @@ class Reports():
         message.attach(payload)
 
         connection = smtplib.SMTP(host="localhost",port= 2500)
-        connection.sendmail(from_addr="mail@attacks.pai", to_addrs="sysadmin@attacks.com",msg=message.as_string())
+        try: 
+            connection.sendmail(from_addr="mail@attacks.pai", to_addrs="sysadmin@attacks.com",msg=message.as_string())
+        except:
+            print("error enviando un email")
         connection.quit()
         
 Reports()

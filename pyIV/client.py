@@ -12,7 +12,7 @@ class Handler_TCPClient():
     def __init__(self, host, port, msg, key):
         self.host = host                                                                                 
         self.port = port                                                                                 
-        self.msg = msg                                                                                   
+        self.msg = msg                                                                                  
         self.key = key                                                                                   
         self.nonce = secrets.token_urlsafe()                                                             
         self.msg_hmac = hmac.new(key.encode(),(msg+self.nonce).encode(), hashlib.sha256).hexdigest()
