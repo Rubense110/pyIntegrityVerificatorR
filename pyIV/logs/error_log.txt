@@ -1,2 +1,2 @@
-err_integridad : 1
-err_integridad : 1
+err_integridad : 2
+err_replay : 6
