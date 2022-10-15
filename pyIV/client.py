@@ -62,13 +62,13 @@ if __name__ == "__main__":
     print("\n Transferencia: ", msg)
     
     print("\n Acciones a realizar: ")
-    print("[1] Envío de transferencia")
-    print("[2] Simulación ataque MitM")
-    print("[3] Simulación ataque de Replay")
-    case1 = int(input("Escoja opción: "))
+    print("[1] Envio de transferencia")
+    print("[2] Simulacion ataque MitM")
+    print("[3] Simulacion ataque de Replay")
+    case1 = int(input("Escoja opcion: "))
 
     while case1 >3 or case1==0:
-        case1 = int(input("Debe escoger entre [1 | 2 | 3], escoja opción: "))
+        case1 = int(input("Debe escoger entre [1 | 2 | 3], escoja opcion: "))
 
     if case1 == 1:
         print("####### Realizando la transferencia... #######\n")
@@ -80,7 +80,7 @@ if __name__ == "__main__":
             os.system("taskkill /f /im  server.exe")
 
     elif case1 == 2:
-        print("####### Simulación ataque MitM #######\n")
+        print("####### Simulacion ataque MitM #######\n")
 
         print("Modificar el mensage original...\n")
         print("Cuenta origen original: ",cuenta_org)
