@@ -36,7 +36,7 @@ class Handler_TCPClient():
         self.data = "|".join([msg,self.nonce,self.msg_hmac])
         self.connect()
     
-    def mitM(self,newmsg):  # MitM attack
+    def mitm(self,newmsg):  # MitM attack
         self.data = "|".join([newmsg,self.nonce,self.msg_hmac])
         self.connect()
     
@@ -58,5 +58,5 @@ if __name__ == "__main__":
     a3 = Handler_TCPClient(host_ip,server_port,msg,key) 
 
     a1.send()                                       # Message 
-    a2.mitM(msg2)                                   # MitM attack
+    a2.mitm(msg2)                                   # MitM attack
     a3.replay(4)                                    # Replay attack

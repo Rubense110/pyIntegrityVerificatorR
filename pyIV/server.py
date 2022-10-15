@@ -20,9 +20,26 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
     """
     def __init__(self, request, client_address, server):
         super().__init__(request, client_address, server)
-
-
     
+    def handle(self): 
+        self.error_file()
+        local_time = time.strftime("[%d/%m/%y %H:%M:%S]", time.localtime())
+
+        self.nonce = secrets.token_urlsafe()
+        self.data = self.request.recv(1024).strip().decode()   # Last message received is loaded  
+        
+        print("\n{} sent:".format(self.client_address[0]))
+        self.verif = Verifier(self.data, sv= True)          # Integrity check of the received message
+        self.message = local_time +" ["+self.client_address[0]+"]"+ self.verif.logData + self.data.split("|")[0]
+        self.msg= self.verif.msgSv[0]
+
+        if self.verif.msgSv[1] == 0: pass
+        elif self.verif.msgSv[1] == 1: self.err_rep +=1
+        else: self.err_mitm +=1
+
+        self.server_response()
+        self.write_error()
+
     def error_file(self): # Error log file
         if os.path.exists(conf.ERROR_SERV):
             f = open(conf.ERROR_SERV, "r")
@@ -68,25 +85,6 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
         self.log(self.message,True)  
         print("Server Response: ",self.msg2) 
 
-    def handle(self): 
-        self.error_file()
-        local_time = time.strftime("[%d/%m/%y %H:%M:%S]", time.localtime())
-
-        self.nonce = secrets.token_urlsafe()
-        self.data = self.request.recv(1024).strip().decode()   # Last message received is loaded  
-        
-        print("\n{} sent:".format(self.client_address[0]))
-        self.verif = Verifier(self.data, sv= True)          # Integrity check of the received message
-        self.message = local_time +" ["+self.client_address[0]+"]"+ self.verif.logData + self.data.split("|")[0]
-        self.msg= self.verif.msgSv[0]
-
-        if self.verif.msgSv[1] == 0: pass
-        elif self.verif.msgSv[1] == 1: self.err_rep +=1
-        else: self.err_mitm +=1
-
-        self.server_response()
-        self.write_error()
-        
     def log(self,mensaje,display=False):
         """
         Returns by console and writes the log in the log file.

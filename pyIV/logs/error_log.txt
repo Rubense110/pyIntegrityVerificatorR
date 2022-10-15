@@ -1,2 +1,2 @@
-mitm_error : 2
-replay_error : 6
+mitm_error : 3
+replay_error : 9
