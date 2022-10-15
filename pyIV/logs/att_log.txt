@@ -1,2 +1,2 @@
-mitm_att : 1
-replay_att : 3
+mitm_att : 3
+replay_att : 7
