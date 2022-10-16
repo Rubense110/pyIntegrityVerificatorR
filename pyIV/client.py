@@ -23,7 +23,7 @@ class Handler_TCPClient():
         try:
             tcp_client.connect((self.host, self.port))
         except:
-            print("Unreachable server..")
+            print("Unreachable server...")
             exit(0)
 
         tcp_client.sendall(self.data.encode())
@@ -34,7 +34,7 @@ class Handler_TCPClient():
         print ("Server Response: ", self.received.decode().split("|")[0])
         Verifier(self.received.decode())
 
-    def send(self):    # Normal message
+    def send(self):    # Regular message
         self.data = "|".join([self.msg,self.nonce,self.msg_hmac])
         self.connect()
     
@@ -48,10 +48,3 @@ class Handler_TCPClient():
         while(i<replays):
             self.connect()
             i+=1
-
-
-    
-
-
-
-

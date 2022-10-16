@@ -1,2 +1,0 @@
-mitm_att : 21928
-replay_att : 65775

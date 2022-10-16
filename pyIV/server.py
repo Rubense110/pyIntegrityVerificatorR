@@ -16,7 +16,7 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
     TCP Server class.
 
     Note:   This class inherits from the class 'socketserver.BaseRequestHandler'.
-            We implement the handle method to exchange data with the client.
+            The handle method is implemented to exchange data with the client.
     """
     def __init__(self, request, client_address, server):
         super().__init__(request, client_address, server)
@@ -54,7 +54,7 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
             self.mitm_att = 0
             self.rep_att = 0
 
-    def write_attack(self):    # Accumulative attacks
+    def write_attack(self):
         attacks =[self.mitm_att, self.rep_att]
         replacement = ""
         f_read = open(conf.ATTS_FROM_C_TO_S, "r")
@@ -100,11 +100,11 @@ if __name__ == "__main__":
 
     HOST, PORT = "localhost", 9999
     handler_tcp = Handler_TCPServer  
-    tcp_server = socketserver.TCPServer((HOST, PORT), handler_tcp) #  Instanciamos el servidor TCP, aplicando el socket correspondiente y nuestro handler
+    tcp_server = socketserver.TCPServer((HOST, PORT), handler_tcp) # TCP server instance, applying the corresponding socket and handler
 
     try:
-        print("Servidor activo (HOST: %s ,PORT: %d)\n" %(HOST, PORT))   # Activamos el servidor TCP.
-        tcp_server.serve_forever()                                      # Para abortar el servidor presionar Ctrl-C
+        print("Active server (HOST: %s ,PORT: %d)\n" %(HOST, PORT))   # TCP server activation
+        tcp_server.serve_forever()                                      # For server abortion press Ctrl-C
 
     except Exception as e:
-        print("Error de apertura servidor: ",e)
+        print("Server opening error: ",e)

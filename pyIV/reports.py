@@ -20,7 +20,7 @@ class Reports():
         try:
             self.craft_email()
         except:
-            print("error enviando email")
+            print("Error sending email")
 
     def report_data(self):
         with open(conf.LOGS, "r") as f:
@@ -44,7 +44,7 @@ class Reports():
         plt.title("Transmissions & Attacks\n",fontdict=f1)
         plt.legend(labels,loc="upper left",fontsize="x-small")
         plt.axis("equal")
-        plt.savefig(os.path.join(conf.GRAPH_FOLDER,"graphic"+self.date+".png"),bbox_inches='tight',dpi=300)
+        plt.savefig(os.path.join(conf.GRAPHS_FOLDER,"graphic"+self.date+".png"),bbox_inches='tight',dpi=300)
 
     def craft_pdf(self):
         percentage = self.accesses_na / self.accesses
@@ -59,7 +59,7 @@ class Reports():
         pdf.cell(200, 10, txt = "INTEGRITY CHECK",ln = 1, align = 'C')
         pdf.set_font('Times', 'B', 16)
         pdf.cell(200, 10, txt = self.date+" report""\n\n" ,ln = 1, align = 'C')
-        pdf.image(os.path.join(conf.GRAPH_FOLDER, "graphic"+self.date+".png"),20,60, h=100,w=180)
+        pdf.image(os.path.join(conf.GRAPHS_FOLDER, "graphic"+self.date+".png"),20,60, h=100,w=180)
         pdf.cell(200, 100, txt = "",ln = 1, align = 'L')
         pdf.set_left_margin(32)
         pdf.set_font("Times",style="")
@@ -69,7 +69,7 @@ class Reports():
         pdf.cell(200, 10, txt = "· Nº of total transmissions: "+str(self.accesses),ln = 1, align = 'L')
         pdf.cell(200, 10, txt = "· KPI = (transmissions w/o attacks) / total transmissions",ln = 1, align = 'L')
         pdf.cell(200, 10, txt = "· Percentage of transmissions w/o attacks (KPI): "+str("{:%}".format(percentage)),ln = 1, align = 'L')
-        pdf.output(os.path.join(conf.PDF_FOLDER,"report-"+self.date+".pdf"), "F")
+        pdf.output(os.path.join(conf.PDFS_FOLDER,"report-"+self.date+".pdf"), "F")
 
     def craft_email(self):
         message = MIMEMultipart()
@@ -80,7 +80,7 @@ class Reports():
         message.attach(text_message)
 
         pdfname= "report-"+self.date+".pdf"
-        pdf = open(os.path.join(conf.PDF_FOLDER,"report-"+self.date+".pdf"), "rb")
+        pdf = open(os.path.join(conf.PDFS_FOLDER,"report-"+self.date+".pdf"), "rb")
         payload = MIMEBase("application","octate-stream",Name = pdfname )
         payload.set_payload(pdf.read())
         encoders.encode_base64(payload)

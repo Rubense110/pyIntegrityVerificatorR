@@ -7,13 +7,13 @@ import conf
 
 nclient = conf.NONCE_CLNT
 nserver = conf.NONCE_SERV
-key = "123456"
+key = "QfTjWnZr4u7x!A%D"
 
 class Verifier():
     """
     This class verifies the integrity (detects MitM attacks and Replay attacks) in a TCP connection.
     """
-    def __init__(self, data, sv = False):    # WARNING: Do not change the attributes order or constructor methods
+    def __init__(self, data, sv = False):    # WARNING: Do not change the order of the attributes or constructor methods
         self.nonces = []
         self.basenonces = nclient if sv == False else nserver
         self.loadNonces()
