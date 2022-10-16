@@ -1,2 +1,0 @@
-mitm_att : 600
-replay_att : 0
