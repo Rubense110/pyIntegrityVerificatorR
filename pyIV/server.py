@@ -71,15 +71,15 @@ class Handler_TCPServer(socketserver.BaseRequestHandler):
     def server_response(self):
         attack = True
         self.msg2 = self.msg
-
         if attack == True:
             x = random.random()
             if(x<1/3): 
                 self.msg2 = self.msg+" theMANisHERE"
             elif x>= 1/3 and x<2/3: 
-                with open(conf.NONCE_CLNT, "rb") as f:
-                    self.nonce = pickle.load(f)[-1]
-                    f.close()
+                if os.path.exists(conf.NONCE_CLNT):
+                    with open(conf.NONCE_CLNT, "rb") as f:
+                        self.nonce = pickle.load(f)[-1]
+                        f.close()
         
         hash_new =  hmac.new(self.verif.key.encode(),(self.msg+self.nonce).encode(), hashlib.sha256).hexdigest()
         response =  "|".join([self.msg2,self.nonce,hash_new])

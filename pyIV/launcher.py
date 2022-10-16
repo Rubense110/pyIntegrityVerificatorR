@@ -79,12 +79,12 @@ if __name__ == "__main__":
                 except Exception as e:
                     os.system("taskkill /f /im  server.exe")
 
-                print("Shutting down the server...")
-                time.sleep(2)
-                os.system("taskkill /f /im  server.exe")
-                print("Leaving...")
-                time.sleep(1.5)
-                exit(0)
+            print("Shutting down the server...")
+            time.sleep(2)
+            os.system("taskkill /f /im  server.exe")
+            print("Leaving...")
+            time.sleep(1.5)
+            exit(0)
                 
         elif case == 2:
             print("Setting audit period...")
