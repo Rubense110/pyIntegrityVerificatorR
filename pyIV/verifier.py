@@ -7,7 +7,7 @@ import conf
 
 nclient = conf.NONCE_CLNT
 nserver = conf.NONCE_SERV
-key = "QfTjWnZr4u7x!A%D"
+key = "d05eb090b65a8bc751b5790133a70eb2"
 
 class Verifier():
     """
