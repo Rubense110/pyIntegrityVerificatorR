@@ -7,7 +7,7 @@ import numpy as np
 from client import Handler_TCPClient as handler
 
 
-key= "123456"
+key= "d05eb090b65a8bc751b5790133a70eb2"
 host_ip, server_port = "127.0.0.1", 9999
 msg = "16272727 17172772 20000"
 msg2= "16272728 17172772 2000000"

@@ -23,7 +23,7 @@ if __name__ == "__main__":
             print("Turning on the system...")
             print("Turning on the server...\n")
             
-            key= "QfTjWnZr4u7x!A%D"
+            key= "d05eb090b65a8bc751b5790133a70eb2"
             host_ip, server_port = "127.0.0.1", 9999
             subprocess.Popen("server.exe" ,shell=True)
             time.sleep(2)
